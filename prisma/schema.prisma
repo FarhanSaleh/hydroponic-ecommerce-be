@@ -20,7 +20,6 @@ model User {
   name          String
   password      String
   phone_number  String
-  address       String
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
   stores        Store[]
@@ -28,15 +27,20 @@ model User {
 }
 
 model Store {
-  id            Int      @id @default(autoincrement())
-  name          String
-  address       String
-  description   String
-  phone_number  String
-  user          User     @relation(fields: [user_id], references: [id])
-  user_id       Int      @unique
-  items         Item[]
-  orders        Order[]
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  address              String
+  description          String
+  phone_number         String
+  bank_name            String
+  bank_account_number  String
+  bank_account_name    String
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+  user                 User     @relation(fields: [user_id], references: [id])
+  user_id              Int      @unique
+  items                Item[]
+  orders               Order[]
 }
 
 model Item {
@@ -54,16 +58,20 @@ model Item {
 }
 
 model Order {
-  id            Int         @id @default(autoincrement())
-  total_price   Int
-  status        OrderStatus @default(PROCESSING)
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @updatedAt
-  store         Store       @relation(fields: [store_id], references: [id])
-  store_id      Int
-  user          User        @relation(fields: [user_id], references: [id])
-  user_id       Int
-  OrderDetails  OrderDetail[]
+  id              Int             @id @default(autoincrement())
+  address         String
+  total_price     Int
+  status          OrderStatus     @default(PROCESSING)
+  payment_method  PaymentMethod   @default(BANK_TRANSFER)
+  payment_status  Boolean         @default(false)
+  payment_proof   String?
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  store           Store           @relation(fields: [store_id], references: [id])
+  store_id        Int
+  user            User            @relation(fields: [user_id], references: [id])
+  user_id         Int
+  OrderDetails    OrderDetail[]
 }
 
 model OrderDetail {
@@ -81,4 +89,9 @@ enum OrderStatus {
   COMPLETED
   CANCELLED
   SHIPPED
+}
+
+enum PaymentMethod {
+  COD
+  BANK_TRANSFER
 }
