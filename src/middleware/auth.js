@@ -1,4 +1,5 @@
 import { responseMessage } from "../constants/index.js";
+import prisma from "../db/index.js";
 import { verifyToken } from "../utils/index.js";
 
 export function authMiddleware(req, res, next) {
@@ -13,6 +14,29 @@ export function authMiddleware(req, res, next) {
   try {
     const decoded = verifyToken(token);
     req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      message: responseMessage.INTERNAL_SERVER_ERROR,
+      error: error.message,
+    });
+  }
+}
+
+export async function storeMiddleware(req, res, next) {
+  console.log("Store middleware triggered");
+  try {
+    const store = await prisma.store.findUnique({
+      where: { user_id: req.user.id },
+    });
+
+    if (!store) {
+      return res.status(404).json({
+        message: responseMessage.ERROR_UNAUTHORIZED,
+      });
+    }
+
+    req.store = store;
     next();
   } catch (error) {
     return res.status(500).json({
