@@ -3,48 +3,33 @@ import prisma from "../../db/index.js";
 
 export const storeController = {
   getStores: async (req, res) => {
-    try {
-      const stores = await prisma.store.findMany();
-      if (stores.length === 0) {
-        return res.status(404).json({
-          message: responseMessage.ERROR_NOT_FOUND,
-        });
-      }
-
-      return res.status(200).json({
-        message: responseMessage.SUCCESS_FETCH,
-        data: stores,
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: responseMessage.ERROR_SERVER,
-        error: error.message,
+    const stores = await prisma.store.findMany();
+    if (stores.length === 0) {
+      return res.status(404).json({
+        message: responseMessage.ERROR_NOT_FOUND,
       });
     }
+
+    return res.status(200).json({
+      message: responseMessage.SUCCESS_FETCH,
+      data: stores,
+    });
   },
   getStoreById: async (req, res) => {
     const { id } = req.params;
-    try {
-      const store = await prisma.store.findUnique({
-        where: { id: parseInt(id, 10) },
-      });
 
-      if (!store) {
-        return res
-          .status(404)
-          .json({ message: responseMessage.ERROR_NOT_FOUND });
-      }
+    const store = await prisma.store.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
 
-      return res.status(200).json({
-        message: responseMessage.SUCCESS_FETCH,
-        data: store,
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: responseMessage.ERROR_SERVER,
-        error: error.message,
-      });
+    if (!store) {
+      return res.status(404).json({ message: responseMessage.ERROR_NOT_FOUND });
     }
+
+    return res.status(200).json({
+      message: responseMessage.SUCCESS_FETCH,
+      data: store,
+    });
   },
   getMyStore: async (req, res) => {
     return res.status(200).json({
@@ -77,30 +62,23 @@ export const storeController = {
       });
     }
 
-    try {
-      const newStore = await prisma.store.create({
-        data: {
-          name,
-          address,
-          description,
-          phone_number,
-          bank_name,
-          bank_account_name,
-          bank_account_number,
-          user_id: req.user.id,
-        },
-      });
+    const newStore = await prisma.store.create({
+      data: {
+        name,
+        address,
+        description,
+        phone_number,
+        bank_name,
+        bank_account_name,
+        bank_account_number,
+        user_id: req.user.id,
+      },
+    });
 
-      return res.status(201).json({
-        message: responseMessage.SUCCESS_INSERT,
-        data: newStore,
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: responseMessage.ERROR_SERVER,
-        error: error.message,
-      });
-    }
+    return res.status(201).json({
+      message: responseMessage.SUCCESS_INSERT,
+      data: newStore,
+    });
   },
   updateMyStore: async (req, res) => {
     const { id } = req.params;
@@ -128,48 +106,34 @@ export const storeController = {
       });
     }
 
-    try {
-      const updatedStore = await prisma.store.update({
-        where: { user_id: req.user.id, id: parseInt(id) },
-        data: {
-          name,
-          address,
-          description,
-          phone_number,
-          bank_name,
-          bank_account_name,
-          bank_account_number,
-        },
-      });
+    const updatedStore = await prisma.store.update({
+      where: { user_id: req.user.id, id: parseInt(id) },
+      data: {
+        name,
+        address,
+        description,
+        phone_number,
+        bank_name,
+        bank_account_name,
+        bank_account_number,
+      },
+    });
 
-      return res.status(200).json({
-        message: responseMessage.SUCCESS_UPDATE,
-        data: updatedStore,
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: responseMessage.ERROR_SERVER,
-        error: error.message,
-      });
-    }
+    return res.status(200).json({
+      message: responseMessage.SUCCESS_UPDATE,
+      data: updatedStore,
+    });
   },
   deleteMyStore: async (req, res) => {
     const { id } = req.params;
 
-    try {
-      const deletedStore = await prisma.store.delete({
-        where: { user_id: req.user.id, id: parseInt(id) },
-      });
+    const deletedStore = await prisma.store.delete({
+      where: { user_id: req.user.id, id: parseInt(id) },
+    });
 
-      return res.status(200).json({
-        message: responseMessage.SUCCESS_DELETE,
-        data: deletedStore,
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: responseMessage.ERROR_SERVER,
-        error: error.message,
-      });
-    }
+    return res.status(200).json({
+      message: responseMessage.SUCCESS_DELETE,
+      data: deletedStore,
+    });
   },
 };
