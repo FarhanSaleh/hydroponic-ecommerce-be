@@ -46,6 +46,12 @@ export const storeController = {
       });
     }
   },
+  getMyStore: async (req, res) => {
+    return res.status(200).json({
+      message: responseMessage.SUCCESS_FETCH,
+      data: req.store,
+    });
+  },
   createStore: async (req, res) => {
     const {
       name,

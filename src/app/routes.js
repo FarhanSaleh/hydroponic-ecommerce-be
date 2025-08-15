@@ -1,23 +1,39 @@
 import { Router } from "express";
 import { userController } from "./users/controller.js";
-import { authMiddleware } from "../middleware/auth.js";
+import { authMiddleware, storeMiddleware } from "../middleware/auth.js";
 import { storeController } from "./stores/controller.js";
+import { itemController } from "./items/controller.js";
+import { upload } from "../middleware/file.js";
 
 const router = Router();
 
+// public routes
 router.post("/auth/register", userController.register);
 router.post("/auth/login", userController.login);
 
+router.get("/items", itemController.getItems);
+router.get("/items/:id", itemController.getItemById);
+
+// protect routes
 router.use(authMiddleware);
-router.get("/profile", userController.getProfile);
+router.get("/users", userController.getProfile);
 router.get("/users/:id", userController.getUserById);
-router.put("/profile", userController.updateProfile);
+router.put("/users", userController.updateProfile);
 router.put("/change-password", userController.changePassword);
 
 router.get("/stores", storeController.getStores);
+router.get("/my/stores", storeMiddleware, storeController.getMyStore);
+router.get("/stores/:id", storeController.getStoreById);
+router.get("/stores/:id/items", itemController.getItemsByStore);
 router.post("/stores", storeController.createStore);
 router.put("/stores/:id", storeController.updateMyStore);
-router.get("/stores/:id", storeController.getStoreById);
 router.delete("/stores/:id", storeController.deleteMyStore);
+
+// protect routes for user with store
+router.use(storeMiddleware);
+router.get("/my/items", itemController.getMyItems);
+router.post("/items", upload.single("image"), itemController.createItem);
+router.put("/items/:id", upload.single("image"), itemController.updateItem);
+router.delete("/items/:id", itemController.deleteItem);
 
 export default router;
