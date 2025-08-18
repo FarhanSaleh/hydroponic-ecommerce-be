@@ -11,37 +11,24 @@ export function authMiddleware(req, res, next) {
       .json({ message: responseMessage.ERROR_UNAUTHORIZED });
   }
 
-  try {
-    const decoded = verifyToken(token);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(500).json({
-      message: responseMessage.INTERNAL_SERVER_ERROR,
-      error: error.message,
-    });
-  }
+  const decoded = verifyToken(token);
+  req.user = decoded;
+  next();
 }
 
 export async function storeMiddleware(req, res, next) {
   console.log("Store middleware triggered");
-  try {
-    const store = await prisma.store.findUnique({
-      where: { user_id: req.user.id },
-    });
 
-    if (!store) {
-      return res.status(404).json({
-        message: responseMessage.ERROR_UNAUTHORIZED,
-      });
-    }
+  const store = await prisma.store.findUnique({
+    where: { user_id: req.user.id },
+  });
 
-    req.store = store;
-    next();
-  } catch (error) {
-    return res.status(500).json({
-      message: responseMessage.INTERNAL_SERVER_ERROR,
-      error: error.message,
+  if (!store) {
+    return res.status(404).json({
+      message: responseMessage.ERROR_UNAUTHORIZED,
     });
   }
+
+  req.store = store;
+  next();
 }

@@ -104,7 +104,7 @@ export const itemController = {
     });
 
     return res.status(201).json({
-      message: responseMessage.SUCCESS_CREATE,
+      message: responseMessage.SUCCESS_INSERT,
       data: newItem,
     });
   },

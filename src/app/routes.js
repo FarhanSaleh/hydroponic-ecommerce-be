@@ -4,6 +4,7 @@ import { authMiddleware, storeMiddleware } from "../middleware/auth.js";
 import { storeController } from "./stores/controller.js";
 import { itemController } from "./items/controller.js";
 import { upload } from "../middleware/file.js";
+import { orderController } from "./orders/controller.js";
 
 const router = Router();
 
@@ -28,6 +29,21 @@ router.get("/stores/:id/items", itemController.getItemsByStore);
 router.post("/stores", storeController.createStore);
 router.put("/stores/:id", storeController.updateMyStore);
 router.delete("/stores/:id", storeController.deleteMyStore);
+
+router.get("/orders", orderController.getOrders);
+router.get("/orders/:id", orderController.getOrderById);
+router.post("/orders", orderController.createOrder);
+router.put("/orders/:id", orderController.updateOrder);
+router.patch(
+  "/orders/:id/pay",
+  upload.single("image"),
+  orderController.processPayment
+);
+router.patch("/orders/:id/status", orderController.updateOrderStatus);
+router.patch(
+  "/orders/:id/payment-status",
+  orderController.updateOrderPaymentStatus
+);
 
 // protect routes for user with store
 router.use(storeMiddleware);

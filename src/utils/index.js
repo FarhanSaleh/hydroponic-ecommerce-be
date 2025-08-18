@@ -16,6 +16,6 @@ export function verifyToken(token) {
   try {
     return jsonwebtoken.verify(token, process.env.SECRET_KEY);
   } catch (error) {
-    throw new Error(error.Error);
+    throw new Error(error.message || "Invalid token");
   }
 }
