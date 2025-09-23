@@ -1,19 +1,16 @@
 import config from "../../config/index.js";
 import { responseMessage } from "../../constants/index.js";
 import prisma from "../../db/index.js";
+import { removeFile } from "../../utils/index.js";
 
 export const orderController = {
-  getOrders: async (req, res) => {
+  getMyOrders: async (req, res) => {
     const orders = await prisma.order.findMany({
       where: {
         user_id: req.user.id,
       },
       include: {
-        OrderDetails: {
-          include: {
-            item: true,
-          },
-        },
+        item: true,
       },
     });
     if (!orders || orders.length === 0) {
@@ -23,7 +20,38 @@ export const orderController = {
     }
 
     for (const order of orders) {
-      order.payment_proof = `${config.BASE_URL}${config.STATIC_PATH}/${order.payment_proof}`;
+      if (order.payment_proof) {
+        order.payment_proof = `${config.BASE_URL}${config.STATIC_PATH}/${order.payment_proof}`;
+      }
+      if (order.item) {
+        order.item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${order.item.image_url}`;
+      }
+    }
+
+    res.status(200).json({
+      message: responseMessage.SUCCESS_FETCH,
+      data: orders,
+    });
+  },
+  getOrders: async (req, res) => {
+    const orders = await prisma.order.findMany({
+      include: {
+        item: true,
+      },
+    });
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({
+        message: responseMessage.ERROR_NOT_FOUND,
+      });
+    }
+
+    for (const order of orders) {
+      if (order.payment_proof) {
+        order.payment_proof = `${config.BASE_URL}${config.STATIC_PATH}/${order.payment_proof}`;
+      }
+      if (order.item) {
+        order.item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${order.item.image_url}`;
+      }
     }
 
     res.status(200).json({
@@ -36,24 +64,24 @@ export const orderController = {
 
     const orders = await prisma.order.findUnique({
       where: {
-        user_id: req.user.id,
         id: parseInt(id, 10),
       },
       include: {
-        OrderDetails: {
-          include: {
-            item: true,
-          },
-        },
+        item: true,
       },
     });
-
-    orders.payment_proof = `${config.BASE_URL}${config.STATIC_PATH}/${orders.payment_proof}`;
 
     if (!orders) {
       return res.status(404).json({
         message: responseMessage.ERROR_NOT_FOUND,
       });
+    }
+
+    if (orders.payment_proof) {
+      orders.payment_proof = `${config.BASE_URL}${config.STATIC_PATH}/${orders.payment_proof}`;
+    }
+    if (orders.item) {
+      orders.item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${orders.item.image_url}`;
     }
 
     res.status(200).json({
@@ -92,16 +120,10 @@ export const orderController = {
           address,
           total_price: item.price * amount,
           payment_method,
-          store_id: item.store_id,
-          user_id: req.user.id,
-        },
-      });
-      const detailOrder = await tx.orderDetail.create({
-        data: {
           amount,
           price_at_order: item.price,
+          user_id: req.user.id,
           item_id: item.id,
-          order_id: order.id,
         },
       });
       await tx.item.update({
@@ -115,7 +137,7 @@ export const orderController = {
         },
       });
 
-      return detailOrder;
+      return order;
     });
 
     return res.status(201).json({
@@ -132,14 +154,29 @@ export const orderController = {
       });
     }
 
+    const order = await prisma.order.findUnique({
+      where: {
+        id: parseInt(id, 10),
+      },
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: responseMessage.ERROR_NOT_FOUND });
+    }
+
     const newOrder = await prisma.order.update({
       data: {
         payment_proof: fileName,
+        payment_status: true
       },
       where: {
         id: parseInt(id, 10),
       },
     });
+
+    if (fileName && order.payment_proof) {
+      removeFile(order.payment_proof);
+    }
 
     return res.status(201).json({
       message: responseMessage.SUCCESS_UPDATE,
@@ -224,7 +261,7 @@ export const orderController = {
     const { id } = req.params;
     const { payment_status } = req.body;
 
-    if (!payment_status) {
+    if (payment_status === undefined) {
       return res.status(400).json({
         message: responseMessage.ERROR_INVALID_INPUT,
       });

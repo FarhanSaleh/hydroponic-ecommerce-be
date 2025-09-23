@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { userController } from "./users/controller.js";
-import { authMiddleware, storeMiddleware } from "../middleware/auth.js";
-import { storeController } from "./stores/controller.js";
+import { authMiddleware, roleMiddleware } from "../middleware/auth.js";
 import { itemController } from "./items/controller.js";
 import { upload } from "../middleware/file.js";
 import { orderController } from "./orders/controller.js";
@@ -22,15 +21,8 @@ router.get("/users/:id", userController.getUserById);
 router.put("/users", userController.updateProfile);
 router.put("/change-password", userController.changePassword);
 
-router.get("/stores", storeController.getStores);
-router.get("/my/stores", storeMiddleware, storeController.getMyStore);
-router.get("/stores/:id", storeController.getStoreById);
-router.get("/stores/:id/items", itemController.getItemsByStore);
-router.post("/stores", storeController.createStore);
-router.put("/stores/:id", storeController.updateMyStore);
-router.delete("/stores/:id", storeController.deleteMyStore);
-
 router.get("/orders", orderController.getOrders);
+router.get("/orders/my", orderController.getMyOrders);
 router.get("/orders/:id", orderController.getOrderById);
 router.post("/orders", orderController.createOrder);
 router.put("/orders/:id", orderController.updateOrder);
@@ -46,8 +38,7 @@ router.patch(
 );
 
 // protect routes for user with store
-router.use(storeMiddleware);
-router.get("/my/items", itemController.getMyItems);
+router.use(roleMiddleware("ADMIN"));
 router.post("/items", upload.single("image"), itemController.createItem);
 router.put("/items/:id", upload.single("image"), itemController.updateItem);
 router.delete("/items/:id", itemController.deleteItem);

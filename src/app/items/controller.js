@@ -1,6 +1,7 @@
 import config from "../../config/index.js";
 import { responseMessage } from "../../constants/index.js";
 import prisma from "../../db/index.js";
+import { removeFile } from "../../utils/index.js";
 
 export const itemController = {
   getItems: async (req, res) => {
@@ -37,28 +38,6 @@ export const itemController = {
       data: item,
     });
   },
-  getItemsByStore: async (req, res) => {
-    const { id } = req.params;
-
-    const items = await prisma.item.findMany({
-      where: { store_id: parseInt(id, 10) },
-    });
-
-    if (items.length === 0) {
-      return res.status(404).json({
-        message: responseMessage.ERROR_NOT_FOUND,
-      });
-    }
-
-    for (const item of items) {
-      item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${item.image_url}`;
-    }
-
-    return res.status(200).json({
-      message: responseMessage.SUCCESS_FETCH,
-      data: items,
-    });
-  },
   getMyItems: async (req, res) => {
     const id = req.store.id;
 
@@ -83,7 +62,6 @@ export const itemController = {
   },
   createItem: async (req, res) => {
     const { name, description, price, stock } = req.body;
-    const storeId = req.store.id;
     const fileName = req.file ? req.file.filename : null;
 
     if (!name || !price || !stock || !fileName) {
@@ -99,7 +77,6 @@ export const itemController = {
         price: parseInt(price, 10),
         stock: parseInt(stock, 10),
         image_url: fileName,
-        store_id: storeId,
       },
     });
 
@@ -111,17 +88,16 @@ export const itemController = {
   updateItem: async (req, res) => {
     const { id } = req.params;
     const { name, description, price, stock } = req.body;
-    const storeId = req.store.id;
     const fileName = req.file ? req.file.filename : null;
 
-    if (!name || !price || !stock || !fileName) {
+    if (!name || !price || !stock) {
       return res.status(400).json({
         message: responseMessage.FIELD_REQUIRED,
       });
     }
 
     const item = await prisma.item.findUnique({
-      where: { id: parseInt(id, 10), store_id: storeId },
+      where: { id: parseInt(id, 10) },
     });
 
     if (!item) {
@@ -136,9 +112,12 @@ export const itemController = {
         price: parseInt(price, 10),
         stock: parseInt(stock, 10),
         image_url: fileName || item.image_url,
-        store_id: storeId,
       },
     });
+
+    if (fileName && item.image_url) {
+      removeFile(item.image_url);
+    }
 
     return res.status(200).json({
       message: responseMessage.SUCCESS_UPDATE,
@@ -147,10 +126,9 @@ export const itemController = {
   },
   deleteItem: async (req, res) => {
     const { id } = req.params;
-    const storeId = req.store.id;
 
     const item = await prisma.item.findUnique({
-      where: { id: parseInt(id, 10), store_id: storeId },
+      where: { id: parseInt(id, 10) },
     });
 
     if (!item) {
@@ -160,6 +138,8 @@ export const itemController = {
     await prisma.item.delete({
       where: { id: parseInt(id, 10) },
     });
+
+    removeFile(item.image_url);
 
     return res.status(200).json({
       message: responseMessage.SUCCESS_DELETE,

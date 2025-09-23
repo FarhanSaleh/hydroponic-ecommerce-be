@@ -13,7 +13,7 @@ const app = express();
 
 const uploadPath = path.join(__dirname, "../../uploads");
 
-const allowedOrigin = ["http://localhost:4000"];
+const allowedOrigin = ["http://localhost:4000", "https://hoppscotch.io"];
 const corsOptions = {
   origin: (origin, callback) => {
     if (allowedOrigin.includes(origin) || !origin) {

@@ -1,10 +1,13 @@
+import { unlinkSync } from "fs";
 import jsonwebtoken from "jsonwebtoken";
+import { join } from "path";
 
 export function generateToken(user) {
   const payload = {
     id: user.id,
     name: user.name,
     email: user.email,
+    role: user.role,
   };
 
   return jsonwebtoken.sign(payload, process.env.SECRET_KEY, {
@@ -17,5 +20,14 @@ export function verifyToken(token) {
     return jsonwebtoken.verify(token, process.env.SECRET_KEY);
   } catch (error) {
     throw new Error(error.message || "Invalid token");
+  }
+}
+
+export function removeFile(fileName,) {
+  const filePath = join(process.cwd(), "uploads", fileName);
+  try {
+    unlinkSync(filePath);
+  } catch (error) {
+    console.error("gagal delete file", error);
   }
 }
