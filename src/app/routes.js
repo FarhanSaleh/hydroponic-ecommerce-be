@@ -31,14 +31,14 @@ router.patch(
   upload.single("image"),
   orderController.processPayment
 );
+
+// protect routes for user with store
+router.use(roleMiddleware("ADMIN"));
 router.patch("/orders/:id/status", orderController.updateOrderStatus);
 router.patch(
   "/orders/:id/payment-status",
   orderController.updateOrderPaymentStatus
 );
-
-// protect routes for user with store
-router.use(roleMiddleware("ADMIN"));
 router.post("/items", upload.single("image"), itemController.createItem);
 router.put("/items/:id", upload.single("image"), itemController.updateItem);
 router.delete("/items/:id", itemController.deleteItem);
