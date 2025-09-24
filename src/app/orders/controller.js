@@ -299,4 +299,25 @@ export const orderController = {
       data: newOrder,
     });
   },
+  deleteOrder: async (req, res) => {
+    const { id } = req.params;
+
+    const order = await prisma.order.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: responseMessage.ERROR_NOT_FOUND });
+    }
+
+    await prisma.order.delete({
+      where: { id: parseInt(id, 10) },
+    });
+
+    removeFile(order.payment_proof);
+
+    return res.status(200).json({
+      message: responseMessage.SUCCESS_DELETE,
+    });
+  },
 };

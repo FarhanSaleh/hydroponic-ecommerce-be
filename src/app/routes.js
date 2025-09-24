@@ -31,6 +31,7 @@ router.patch(
   upload.single("image"),
   orderController.processPayment
 );
+router.delete("/orders/:id", orderController.deleteOrder);
 
 // protect routes for user with store
 router.use(roleMiddleware("ADMIN"));
