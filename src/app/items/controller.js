@@ -1,7 +1,7 @@
 import config from "../../config/index.js";
 import { responseMessage } from "../../constants/index.js";
 import prisma from "../../db/index.js";
-import { removeFile } from "../../utils/index.js";
+import { formatDate, removeFile } from "../../utils/index.js";
 
 export const itemController = {
   getItems: async (req, res) => {
@@ -14,6 +14,8 @@ export const itemController = {
 
     for (const item of items) {
       item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${item.image_url}`;
+      item.created_at = formatDate(item.created_at);
+      item.updated_at = formatDate(item.updated_at);
     }
 
     return res.status(200).json({
@@ -32,6 +34,8 @@ export const itemController = {
       return res.status(404).json({ message: responseMessage.ERROR_NOT_FOUND });
     }
     item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${item.image_url}`;
+    item.created_at = formatDate(item.created_at);
+    item.updated_at = formatDate(item.updated_at);
 
     return res.status(200).json({
       message: responseMessage.SUCCESS_FETCH,
@@ -53,6 +57,8 @@ export const itemController = {
 
     for (const item of items) {
       item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${item.image_url}`;
+      item.created_at = formatDate(item.created_at);
+      item.updated_at = formatDate(item.updated_at);
     }
 
     return res.status(200).json({

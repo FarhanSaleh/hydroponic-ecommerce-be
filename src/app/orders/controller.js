@@ -1,7 +1,7 @@
 import config from "../../config/index.js";
 import { responseMessage } from "../../constants/index.js";
 import prisma from "../../db/index.js";
-import { removeFile } from "../../utils/index.js";
+import { formatDate, removeFile } from "../../utils/index.js";
 
 export const orderController = {
   getMyOrders: async (req, res) => {
@@ -26,6 +26,8 @@ export const orderController = {
       if (order.item) {
         order.item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${order.item.image_url}`;
       }
+      order.created_at = formatDate(order.created_at);
+      order.updated_at = formatDate(order.updated_at);
     }
 
     res.status(200).json({
@@ -52,6 +54,8 @@ export const orderController = {
       if (order.item) {
         order.item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${order.item.image_url}`;
       }
+      order.created_at = formatDate(order.created_at);
+      order.updated_at = formatDate(order.updated_at);
     }
 
     res.status(200).json({
@@ -83,6 +87,8 @@ export const orderController = {
     if (orders.item) {
       orders.item.image_url = `${config.BASE_URL}${config.STATIC_PATH}/${orders.item.image_url}`;
     }
+    orders.created_at = formatDate(orders.created_at);
+    orders.updated_at = formatDate(orders.updated_at);
 
     res.status(200).json({
       message: responseMessage.SUCCESS_FETCH,
@@ -167,7 +173,7 @@ export const orderController = {
     const newOrder = await prisma.order.update({
       data: {
         payment_proof: fileName,
-        payment_status: true
+        payment_status: true,
       },
       where: {
         id: parseInt(id, 10),
