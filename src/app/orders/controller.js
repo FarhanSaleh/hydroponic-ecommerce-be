@@ -39,6 +39,14 @@ export const orderController = {
     const orders = await prisma.order.findMany({
       include: {
         item: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone_number: true,
+          },
+        },
       },
     });
     if (!orders || orders.length === 0) {
@@ -72,6 +80,14 @@ export const orderController = {
       },
       include: {
         item: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone_number: true,
+          },
+        },
       },
     });
 
