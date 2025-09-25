@@ -25,8 +25,8 @@ export function verifyToken(token) {
 }
 
 export function removeFile(fileName) {
-  const filePath = join(process.cwd(), "uploads", fileName);
   try {
+    const filePath = join(process.cwd(), "uploads", fileName);
     unlinkSync(filePath);
   } catch (error) {
     console.error("gagal delete file", error);
