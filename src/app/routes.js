@@ -34,10 +34,10 @@ router.patch(
   orderController.processPayment
 );
 router.delete("/orders/:id", orderController.deleteOrder);
+router.patch("/orders/:id/status", orderController.updateOrderStatus);
 
 // protect routes for user with store
 router.use(roleMiddleware("ADMIN"));
-router.patch("/orders/:id/status", orderController.updateOrderStatus);
 router.patch(
   "/orders/:id/payment-status",
   orderController.updateOrderPaymentStatus
