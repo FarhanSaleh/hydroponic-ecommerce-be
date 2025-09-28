@@ -12,6 +12,9 @@ export const orderController = {
       include: {
         item: true,
       },
+      orderBy: {
+        created_at: "desc",
+      },
     });
     if (!orders || orders.length === 0) {
       return res.status(404).json({
@@ -47,6 +50,9 @@ export const orderController = {
             phone_number: true,
           },
         },
+      },
+      orderBy: {
+        created_at: "desc",
       },
     });
     if (!orders || orders.length === 0) {
