@@ -4,6 +4,7 @@ import { authMiddleware, roleMiddleware } from "../middleware/auth.js";
 import { itemController } from "./items/controller.js";
 import { upload } from "../middleware/file.js";
 import { orderController } from "./orders/controller.js";
+import { settingController } from "./settings/controller.js";
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.post("/auth/login", userController.login);
 
 router.get("/items", itemController.getItems);
 router.get("/items/:id", itemController.getItemById);
+router.get("/settings/bank", settingController.getBankDetail);
 
 // protect routes
 router.use(authMiddleware);
@@ -43,5 +45,6 @@ router.patch(
 router.post("/items", upload.single("image"), itemController.createItem);
 router.put("/items/:id", upload.single("image"), itemController.updateItem);
 router.delete("/items/:id", itemController.deleteItem);
+router.patch("/settings/bank", settingController.updateBankDetail);
 
 export default router;

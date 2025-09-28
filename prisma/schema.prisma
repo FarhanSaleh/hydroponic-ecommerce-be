@@ -26,6 +26,13 @@ model User {
   orders        Order[]
 }
 
+model Setting {
+  id    Int     @id @default(autoincrement())
+  key   String  @unique
+  value String
+  description String? 
+}
+
 model Item {
   id            Int      @id @default(autoincrement())
   name          String
